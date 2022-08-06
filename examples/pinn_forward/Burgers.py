@@ -31,7 +31,15 @@ ic = dde.icbc.IC(
 data = dde.data.TimePDE(
     geomtime, pde, [bc, ic], num_domain=2540, num_boundary=80, num_initial=160
 )
-net = dde.nn.FNN([2] + [20] * 3 + [1], "tanh", "Glorot normal")
+init_width = [2]
+hidden_layer_widths = [20]
+output_width = [1]
+num_hidden_layers = 3
+net = dde.nn.FNN(
+    init_width + hidden_layer_widths * num_hidden_layers + output_width,
+    "tanh",
+    "Glorot normal",
+)
 model = dde.Model(data, net)
 
 model.compile("adam", lr=1e-3)
@@ -39,6 +47,10 @@ model.train(epochs=15000)
 model.compile("L-BFGS")
 losshistory, train_state = model.train()
 dde.saveplot(losshistory, train_state, issave=True, isplot=True)
+
+onnx = dde.ONNX(model, init_width, "burgers.onnx")
+onnx.export()
+onnx.check()
 
 X, y_true = gen_testdata()
 y_pred = model.predict(X)

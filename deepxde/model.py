@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 import numpy as np
 
+import onnx
+
 from . import config
 from . import display
 from . import gradients as grad
@@ -981,3 +983,22 @@ class LossHistory:
             metrics_test = self.metrics_test[-1]
         self.loss_test.append(loss_test)
         self.metrics_test.append(metrics_test)
+
+
+class ONNX:
+    def __init__(
+        self, model: "Model", input_layer_size: "int", save_path: "str"
+    ) -> None:
+        self.save_path = save_path
+        if backend_name == "pytorch":
+            self.model_inference_mode = model.net.eval()
+            self.dummy_tensor = torch.randn(input_layer_size)
+
+    def export(self) -> None:
+        if backend_name == "pytorch":
+            torch.onnx.export(
+                self.model_inference_mode, self.dummy_tensor, self.save_path
+            )
+
+    def check(self) -> None:
+        onnx.checker.check_model(onnx.load(self.save_path))
