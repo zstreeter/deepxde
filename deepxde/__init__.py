@@ -8,6 +8,7 @@ __all__ = [
     "nn",
     "utils",
     "Model",
+    "ONNX",
     "Variable",
 ]
 
@@ -26,6 +27,7 @@ from . import utils
 
 from .backend import Variable
 from .model import Model
+from .model import ONNX
 from .utils import saveplot
 
 # Backward compatibility
